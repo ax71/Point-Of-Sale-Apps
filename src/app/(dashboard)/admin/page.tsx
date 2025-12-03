@@ -1,7 +1,9 @@
-export default function AdminDashboardPage() {
-  return (
-    <div>
-      <p className="">hello dashboard admin</p>
-    </div>
-  );
+import Dashboard from "./_components/dashboard";
+
+const metadata = {
+  title: "tenunalus | Admin Management",
+};
+
+export default function AdminManagementPage() {
+  return <Dashboard />;
 }

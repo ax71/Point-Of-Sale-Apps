@@ -5,19 +5,20 @@ import DropdownAction from "@/components/common/dropdown-action";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { HEADER_TABLE_USER } from "@/constants/user-constant";
+import { HEADER_TABLE_TABLE } from "@/constants/table-constant";
 import useDataTable from "@/hooks/use-data-table";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+import { Table } from "@/validations/table-validations";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import DialogCreateUser from "./dialog-create-user";
-import { Profile } from "@/types/auth";
-import DialogUpdateUser from "./dialog-update-user";
-import DialogDeleteUser from "./dialog-delete-user";
+import DialogCreateTable from "./dialog-create-table";
+import DialogUpdateTable from "./dialog-update-table";
+import DialogDeleteTable from "./dialog-delete-table";
 
-export default function UserManagement() {
+export default function TableManagement() {
   const supabase = createClient();
   const {
     currentPage,
@@ -29,21 +30,28 @@ export default function UserManagement() {
   } = useDataTable();
 
   const {
-    data: users,
+    data: tables,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["users", currentPage, currentLimit, currentSearch],
+    queryKey: ["tables", currentPage, currentLimit, currentSearch],
     queryFn: async () => {
-      const result = await supabase
-        .from("profiles")
+      const query = supabase
+        .from("tables")
         .select("*", { count: "exact" })
         .range((currentPage - 1) * currentLimit, currentPage * currentLimit - 1)
-        .order("created_at")
-        .ilike("name", `%${currentSearch}%`);
+        .order("created_at");
+
+      if (currentSearch) {
+        query.or(
+          `name.ilike.%${currentSearch}%,description.ilike.%${currentSearch}%,status.ilike.%${currentSearch}%`
+        );
+      }
+
+      const result = await query;
 
       if (result.error)
-        toast.error("Get User data Failed", {
+        toast.error("Get Table data Failed", {
           description: result.error.message,
         });
 
@@ -52,7 +60,7 @@ export default function UserManagement() {
   });
 
   const [selectedAction, setSelectedAction] = useState<{
-    data: Profile;
+    data: Table;
     type: "update" | "delete";
   } | null>(null);
 
@@ -61,12 +69,23 @@ export default function UserManagement() {
   };
 
   const filteredData = useMemo(() => {
-    return (users?.data || []).map((user, index) => {
+    return (tables?.data || []).map((table: Table, index) => {
       return [
         currentLimit * (currentPage - 1) + index + 1,
-        user.id,
-        user.name,
-        user.role,
+        <div>
+          <h4 className="font-bold">{table.name}</h4>
+          <p className="text-xs"> {table.description}</p>
+        </div>,
+        table.capacity,
+        <div
+          className={cn("px-2 py 2 rounded-full text-white w-fit capitalize", {
+            "bg-green-600": table.status === "available",
+            "bg-red-600": table.status === "unavailable",
+            "bg-yellow-600": table.status === "reserved",
+          })}
+        >
+          {table.status}
+        </div>,
         <DropdownAction
           menu={[
             {
@@ -77,7 +96,7 @@ export default function UserManagement() {
               ),
               action: () => {
                 setSelectedAction({
-                  data: user,
+                  data: table,
                   type: "update",
                 });
               },
@@ -91,7 +110,7 @@ export default function UserManagement() {
               variant: "destructive",
               action: () => {
                 setSelectedAction({
-                  data: user,
+                  data: table,
                   type: "delete",
                 });
               },
@@ -100,33 +119,33 @@ export default function UserManagement() {
         />,
       ];
     });
-  }, [users]);
+  }, [tables]);
 
   const totalPages = useMemo(() => {
-    return users && users.count !== null
-      ? Math.ceil(users.count / currentLimit)
+    return tables && tables.count !== null
+      ? Math.ceil(tables.count / currentLimit)
       : 0;
-  }, [users]);
+  }, [tables]);
 
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row mb-4 gap-2 justify-between">
-        <p className="text-2xl font-bold">User Management</p>
+        <p className="text-2xl font-bold">Table Management</p>
         <div className="flex gap-2">
           <Input
-            placeholder="Search by name"
+            placeholder="Search..."
             onChange={(e) => handleChangeSearch(e.target.value)}
           />
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline">Create</Button>
             </DialogTrigger>
-            <DialogCreateUser refetch={refetch} />
+            <DialogCreateTable refetch={refetch} />
           </Dialog>
         </div>
       </div>
       <DataTable
-        header={HEADER_TABLE_USER}
+        header={HEADER_TABLE_TABLE}
         data={filteredData}
         isLoading={isLoading}
         totalPages={totalPages}
@@ -135,13 +154,13 @@ export default function UserManagement() {
         onChangePage={handleChangePage}
         onChangeLimit={handleChangeLimit}
       />
-      <DialogUpdateUser
+      <DialogUpdateTable
         open={selectedAction !== null && selectedAction.type === "update"}
         refetch={refetch}
         currentData={selectedAction?.data}
         handleChangeAction={handleChangeAction}
       />
-      <DialogDeleteUser
+      <DialogDeleteTable
         open={selectedAction !== null && selectedAction.type === "delete"}
         refetch={refetch}
         currentData={selectedAction?.data}

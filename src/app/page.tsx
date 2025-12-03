@@ -1,13 +1,20 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/stores/auth-store";
 import Link from "next/link";
 
 export default function Home() {
+  const profile = useAuthStore((state) => state.profile);
+  console.log(profile);
+
   return (
     <div className="bg-muted flex justify-center items-center h-screen flex-col space-y-4">
-      <h1 className="text-4xl font-semibold">Welcome King BOB!!!</h1>
-      <Link href="/admin">
-        <button className="bg-amber-500 text-white px-4 py-2 rounded-md">
-          Access Dashboard
-        </button>
+      <h1 className="text-4xl font-semibold">Welcome {profile?.name}</h1>
+      <Link href={profile?.role === "admin" ? "/admin" : "/order"}>
+        <Button className="bg-amber-500 text-white hover:bg-amber-600">
+          Access Dashboard {profile?.role}
+        </Button>
       </Link>
     </div>
   );

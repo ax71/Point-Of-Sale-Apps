@@ -147,7 +147,7 @@ export default function MenuManagement() {
         <p className="text-2xl font-bold">Menu Management</p>
         <div className="flex gap-2">
           <Input
-            placeholder="Search By Name"
+            placeholder="Search..."
             onChange={(e) => handleChangeSearch(e.target.value)}
           />
           <Dialog>
