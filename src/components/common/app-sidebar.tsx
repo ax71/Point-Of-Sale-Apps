@@ -49,7 +49,7 @@ export default function AppSidebar() {
                 <div className=" bg-amber-500 flex p-2 items-center justify-center rounded-md">
                   <Store className="size-4" />
                 </div>
-                Tenunalus Maura
+                CAFE-IN
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

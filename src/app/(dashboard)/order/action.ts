@@ -30,7 +30,7 @@ export async function createOrder(
 
   const supabase = await createClient();
 
-  const orderId = `Tenunalus-${Date.now()}`;
+  const orderId = `CAFE-IN-${Date.now()}`;
 
   const [orderResult, tableResult] = await Promise.all([
     supabase.from("orders").insert({

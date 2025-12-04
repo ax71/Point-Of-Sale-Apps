@@ -1,7 +1,7 @@
 import Failed from "./_componets/failed";
 
 const metadata = {
-  title: "tenunalus | Payment Failed",
+  title: "CAFE-IN | Payment Failed",
 };
 
 export default function SuccessPage() {

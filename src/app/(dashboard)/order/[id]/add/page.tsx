@@ -1,7 +1,7 @@
 import AddOrderItem from "./_components/add-order-item";
 
 const metadata = {
-  title: "tenunalus | Order Management",
+  title: "CAFE-IN | Order Management",
 };
 
 export default async function AddOrderItemPage({

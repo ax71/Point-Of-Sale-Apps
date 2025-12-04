@@ -1,7 +1,7 @@
 import TableManagement from "./_components/table";
 
 const metadata = {
-  title: "tenunalus | Table Management",
+  title: "CAFE-IN | Table Management",
 };
 
 export default function MenuManagementPage() {

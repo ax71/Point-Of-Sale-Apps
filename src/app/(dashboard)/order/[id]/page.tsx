@@ -3,7 +3,7 @@ import DetailOrder from "./_components/detail-order";
 import { environment } from "@/configs/evironment";
 
 const metadata = {
-  title: "tenunalus | Detail Order",
+  title: "CAFE-IN | Detail Order",
 };
 
 declare global {
