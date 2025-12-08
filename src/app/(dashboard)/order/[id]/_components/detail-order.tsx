@@ -22,6 +22,7 @@ import { EllipsisVertical } from "lucide-react";
 import { updateStatusOrderItems } from "../../action";
 import { INITIAL_STATE_ACTION } from "@/constants/general-constant";
 import { useAuthStore } from "@/stores/auth-store";
+import Receipt from "./receipt";
 
 export default function DetailOrder({ id }: { id: string }) {
   const supabase = createClientSupabase();
@@ -34,7 +35,9 @@ export default function DetailOrder({ id }: { id: string }) {
     queryFn: async () => {
       const result = await supabase
         .from("orders")
-        .select("id, customer_name, status, payment_token, tables(name, id)")
+        .select(
+          "id, customer_name, status, payment_token,created_at, tables(name, id)"
+        )
         .eq("order_id", id)
         .single();
 
@@ -147,7 +150,7 @@ export default function DetailOrder({ id }: { id: string }) {
             </span>
           </div>
         </div>,
-        <div>{convertIDR(item.menus.price * item.quantity)}</div>,
+        <div>{convertIDR(item.nominal)}</div>,
         <div
           className={cn("px-2 py 2 rounded-full text-white w-fit capitalize", {
             "bg-gray-500": item.status === "pending",
@@ -207,10 +210,13 @@ export default function DetailOrder({ id }: { id: string }) {
     <div className="w-full space-y-4">
       <div className="flex justify-between items-center gap-4 w-full">
         <p className="text-2xl font-bold">Detail Order</p>
-        {profile.role !== "kitchen" && (
+        {profile.role !== "kitchen" && order?.status === "process" && (
           <Link href={`/order/${id}/add`}>
             <Button>Add Order Item</Button>
           </Link>
+        )}
+        {order?.status === "settled" && (
+          <Receipt order={order} orderMenu={orderMenu?.data} orderId={id} />
         )}
       </div>
       <div className="flex flex-col lg:flex-row gap-4 w-full">

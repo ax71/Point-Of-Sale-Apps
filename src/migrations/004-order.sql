@@ -27,3 +27,7 @@ create table public.orders_menus (
 );
 
 alter table public.orders_menus enable row level security; 
+
+-- update teble orders_menus karena kurang column nominal
+alter table orders_menus 
+add column nominal integer;

@@ -36,7 +36,7 @@ export default function FormMenu<T extends FieldValues>({
     <DialogContent className="sm:max-w-[425px]">
       <Form {...form}>
         <DialogHeader>
-          <DialogTitle>{type} Manu </DialogTitle>
+          <DialogTitle>{type} Menu </DialogTitle>
           <DialogDescription>
             {type === "Create" ? "Add a new menu" : "Make Changes menu here"}
           </DialogDescription>
@@ -49,7 +49,6 @@ export default function FormMenu<T extends FieldValues>({
               label="Name"
               placeholder="Insert name here"
             />
-
             <FormInput
               form={form}
               name={"description" as Path<T>}
@@ -57,14 +56,12 @@ export default function FormMenu<T extends FieldValues>({
               placeholder="Insert description here"
               type="textarea"
             />
-
             <FormSelect
               form={form}
               name={"category" as Path<T>}
               label="Category"
               selectItem={CATEGORY_LIST}
             />
-
             <FormInput
               form={form}
               name={"price" as Path<T>}
@@ -72,7 +69,6 @@ export default function FormMenu<T extends FieldValues>({
               placeholder="Insert price here"
               type="number"
             />
-
             <FormInput
               form={form}
               name={"discount" as Path<T>}
@@ -80,7 +76,6 @@ export default function FormMenu<T extends FieldValues>({
               placeholder="Insert discount here"
               type="number"
             />
-
             <FormImage
               form={form}
               name={"image_url" as Path<T>}

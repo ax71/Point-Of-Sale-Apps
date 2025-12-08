@@ -1,16 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { startTransition, useActionState, useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Preview } from "@/types/general";
-import { Table } from "@/validations/table-validations";
-import { OrderForm, orderFormSchema } from "@/validations/order-validation";
 import {
-  INITIAL_ORDER,
-  INITIAL_STATE_ORDER,
-  STATUS_CREATE_ORDER,
+  OrderTakeawayForm,
+  orderTakeawayFormSchema,
+} from "@/validations/order-validation";
+import {
+  INITIAL_ORDER_TAKEAWAY,
+  INITIAL_STATE_ORDER_TAKEAWAY,
 } from "@/constants/order-constants";
-import { createOrder } from "../action";
+import { createOrderTakeaway } from "../action";
 import {
   DialogClose,
   DialogContent,
@@ -21,22 +21,21 @@ import {
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import FormInput from "@/components/common/form-input";
-import FormSelect from "@/components/common/form-select";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-export default function DialogCreateOrder({
-  tables,
+export default function DialogCreateOrderTakeaway({
+  closeDialog,
 }: {
-  tables: Table[] | undefined | null;
+  closeDialog: () => void;
 }) {
-  const form = useForm<OrderForm>({
-    resolver: zodResolver(orderFormSchema),
-    defaultValues: INITIAL_ORDER,
+  const form = useForm<OrderTakeawayForm>({
+    resolver: zodResolver(orderTakeawayFormSchema),
+    defaultValues: INITIAL_ORDER_TAKEAWAY,
   });
 
   const [createOrderState, createOrderAction, isPandingCreateOrder] =
-    useActionState(createOrder, INITIAL_STATE_ORDER);
+    useActionState(createOrderTakeaway, INITIAL_STATE_ORDER_TAKEAWAY);
 
   const onSubmit = form.handleSubmit(async (data) => {
     const formData = new FormData();
@@ -59,7 +58,7 @@ export default function DialogCreateOrder({
     if (createOrderState.status === "success") {
       toast.success("Create Order Success");
       form.reset();
-      document.querySelector<HTMLButtonElement>('[data-state="open"]')?.click();
+      closeDialog();
     }
   }, [createOrderState]);
 
@@ -67,34 +66,16 @@ export default function DialogCreateOrder({
     <DialogContent className="sm:max-w-[425px]">
       <Form {...form}>
         <DialogHeader>
-          <DialogTitle>Create Order </DialogTitle>
+          <DialogTitle>Create Order Takeaway</DialogTitle>
           <DialogDescription>Add a new order from customer</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
-          <div className="space-y-4 max-h-[48vh] px-1 overflow-y-auto">
+          <div className="space-y-4 max-h-[48vh] p-1 overflow-y-auto">
             <FormInput
               form={form}
               name="customer_name"
               label="Customer Name"
               placeholder="Insert customer name here"
-            />
-
-            <FormSelect
-              form={form}
-              name={"table_id"}
-              label="Table"
-              selectItem={(tables ?? []).map((table: Table) => ({
-                value: `${table.id}`,
-                label: `${table.name} - ${table.status} (${table.capacity})`,
-                disabled: table.status !== "available",
-              }))}
-            />
-
-            <FormSelect
-              form={form}
-              name={"status"}
-              label="Status"
-              selectItem={STATUS_CREATE_ORDER}
             />
           </div>
           <DialogFooter>

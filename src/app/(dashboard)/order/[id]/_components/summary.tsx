@@ -27,6 +27,7 @@ export default function Summary({
     menus: Menu;
     quantity: number;
     status: string;
+    nominal: number;
   }[];
   id: string;
 }) {
@@ -76,9 +77,12 @@ export default function Summary({
               <Input value={order?.customer_name} disabled />
             </div>
             <div className="space-y-2">
-              <Label>Name</Label>
+              <Label>Table</Label>
               <Input
-                value={(order?.tables as unknown as { name: string })?.name}
+                value={
+                  (order?.tables as unknown as { name: string })?.name ||
+                  "Takeaway"
+                }
                 disabled
               />
             </div>
@@ -108,8 +112,12 @@ export default function Summary({
             <Button
               type="submit"
               onClick={handleGeneratePayment}
-              disabled={!isAllServed || isPendingGeneratePayment}
-              className="w-full font font-semibold bg-teal-500 hover:bg-teal-600 text-white cursor-pointer"
+              disabled={
+                !isAllServed ||
+                isPendingGeneratePayment ||
+                orderMenu?.length === 0
+              }
+              className="w-full font font-semibold bg-amber-500 hover:bg-amber-600 text-white cursor-pointer"
             >
               {isPendingGeneratePayment ? (
                 <Loader2 className="animate-spin" />
