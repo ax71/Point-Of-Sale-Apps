@@ -6,7 +6,6 @@ import Link from "next/link";
 
 export default function Home() {
   const profile = useAuthStore((state) => state.profile);
-  console.log(profile);
 
   return (
     <div className="bg-muted flex justify-center items-center h-screen flex-col space-y-4">
