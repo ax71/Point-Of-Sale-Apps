@@ -20,6 +20,10 @@ export const CATEGORY_LIST = [
     value: "desserts",
     label: "Desserts",
   },
+  {
+    value: "pastries",
+    label: "Pastries",
+  },
 ];
 
 export const AVAILABILITY_LIST = [

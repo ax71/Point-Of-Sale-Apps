@@ -203,7 +203,7 @@ export default function Dashboard() {
         </Card>
       </div>
       <div className=" flex flex-col lg:flex-row gap-4">
-        <Card className="w-full lg:w-2/3">
+        <Card className="w-full lg:w-2/3 h-full">
           <CardHeader>
             <CardTitle>Orders create per week</CardTitle>
             <CardDescription>
@@ -231,8 +231,9 @@ export default function Dashboard() {
                   <div>
                     <h3 className="font-semibold">{order?.customer_name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Table:{" "}
-                      {(order?.tables as unknown as { name: string })?.name}
+                      Table:
+                      {(order?.tables as unknown as { name: string })?.name ||
+                        "Takeaway"}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Order ID: {order?.order_id}

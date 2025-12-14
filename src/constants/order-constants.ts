@@ -65,11 +65,6 @@ export const FILTER_MENU = [
     value: "mains",
     label: "Mains",
   },
-
-  {
-    value: "sides",
-    label: "Sides",
-  },
   {
     value: "desserts",
     label: "Desserts",
@@ -78,6 +73,10 @@ export const FILTER_MENU = [
   {
     value: "beverages",
     label: "Beverages",
+  },
+  {
+    value: "pastries",
+    label: "Pastries",
   },
 ];
 
