@@ -20,7 +20,7 @@ export default function LineCarts({
         <Line
           type="monotone"
           dataKey="total"
-          stroke="#00bba7"
+          stroke="#00bba7" //ffc107
           strokeWidth={2}
         />
         <XAxis dataKey="name" className="!hide !opacity-0" />

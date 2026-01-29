@@ -19,6 +19,7 @@ export default function Dashboard() {
   const supabase = createClient();
 
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
+
   const lastWeek = new Date();
   lastWeek.setDate(lastWeek.getDate() - 6);
   lastWeek.setHours(0, 0, 0, 0);
@@ -34,6 +35,13 @@ export default function Dashboard() {
     });
   }, []);
 
+  const now = new Date();
+  const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const thisMonthISO = firstDayThisMonth.toISOString();
+  const lastMonthISO = firstDayLastMonth.toISOString();
+
   const { data: orders } = useQuery({
     queryKey: ["orders-per-day"],
     queryFn: async () => {
@@ -45,7 +53,6 @@ export default function Dashboard() {
         .order("created_at");
 
       const counts: Record<string, number> = {};
-
       (data ?? []).forEach((order) => {
         const date = new Date(order.created_at).toLocaleDateString("en-CA");
         counts[date] = (counts[date] || 0) + 1;
@@ -57,52 +64,45 @@ export default function Dashboard() {
     },
   });
 
-  const thisMonth = new Date(
-    new Date().getFullYear(),
-    new Date().getMonth(),
-    1
-  ).toISOString();
-
-  const lastMonth = new Date(new Date().getFullYear(), 0, 1).toISOString();
-
   const { data: revenue } = useQuery({
     queryKey: ["revenue"],
     queryFn: async () => {
       const { data: dataThisMonth } = await supabase
         .from("orders_menus")
         .select("nominal, created_at")
-        .gte("created_at", thisMonth);
+        .gte("created_at", thisMonthISO);
 
       const { data: dataLastMonth } = await supabase
         .from("orders_menus")
         .select("nominal, created_at")
-        .gte("created_at", lastMonth)
-        .lt("created_at", thisMonth);
+        .gte("created_at", lastMonthISO)
+        .lt("created_at", thisMonthISO);
 
       const totalRevenueThisMonth = (dataThisMonth ?? []).reduce(
-        (sum, item) => {
-          return sum + item.nominal;
-        },
-        0
+        (sum, item) => sum + item.nominal,
+        0,
       );
 
       const totalRevenueLastMonth = (dataLastMonth ?? []).reduce(
-        (sum, item) => {
-          return sum + item.nominal;
-        },
-        0
+        (sum, item) => sum + item.nominal,
+        0,
       );
 
-      const growthRate = (
-        ((totalRevenueThisMonth - totalRevenueLastMonth) /
-          totalRevenueLastMonth) *
-        100
-      ).toFixed(2);
+      let growthRate = "0.00";
+      if (totalRevenueLastMonth > 0) {
+        growthRate = (
+          ((totalRevenueThisMonth - totalRevenueLastMonth) /
+            totalRevenueLastMonth) *
+          100
+        ).toFixed(2);
+      } else if (totalRevenueThisMonth > 0) {
+        growthRate = "100.00";
+      }
 
       const daysInData = new Set(
         (dataThisMonth ?? []).map((item) =>
-          new Date(item.created_at).toISOString().slice(0, 10)
-        )
+          new Date(item.created_at).toISOString().slice(0, 10),
+        ),
       ).size;
 
       const AverageRevenueThisMonth =
@@ -124,7 +124,7 @@ export default function Dashboard() {
         .from("orders")
         .select("id", { count: "exact" })
         .eq("status", "settled")
-        .gte("created_at", thisMonth);
+        .gte("created_at", thisMonthISO);
 
       return count;
     },
@@ -143,6 +143,7 @@ export default function Dashboard() {
       return data;
     },
   });
+
   return (
     <div className="w-full">
       <div className="flex flex-col lg:flex-row mb-4 gap-2 justify-between">
@@ -164,14 +165,14 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>Avarage Revenue</CardDescription>
+            <CardDescription>Average Revenue</CardDescription>
             <CardTitle className="text-3xl font-bold">
               {convertIDR(revenue?.AverageRevenueThisMonth ?? 0)}
             </CardTitle>
           </CardHeader>
           <CardFooter>
             <div className="text-muted-foreground text-sm">
-              <p>*Avarage per day</p>
+              <p>*Average per day</p>
             </div>
           </CardFooter>
         </Card>
@@ -192,7 +193,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardDescription>Growth rate</CardDescription>
             <CardTitle className="text-3xl font-bold">
-              {revenue?.growthRate ?? 0}%
+              {revenue?.growthRate ?? "0.00"}%
             </CardTitle>
           </CardHeader>
           <CardFooter>
@@ -202,7 +203,7 @@ export default function Dashboard() {
           </CardFooter>
         </Card>
       </div>
-      <div className=" flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <Card className="w-full lg:w-2/3 h-full">
           <CardHeader>
             <CardTitle>Orders create per week</CardTitle>
@@ -222,18 +223,16 @@ export default function Dashboard() {
             <CardDescription>Showing last 5 active orders</CardDescription>
           </CardHeader>
           <div className="px-6">
-            {lastOrder ? (
+            {lastOrder && lastOrder.length > 0 ? (
               lastOrder.map((order) => (
                 <div
                   key={order?.id}
-                  className="flex items-center  justify-between mb-4"
+                  className="flex items-center justify-between mb-4"
                 >
                   <div>
                     <h3 className="font-semibold">{order?.customer_name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Table:
-                      {(order?.tables as unknown as { name: string })?.name ||
-                        "Takeaway"}
+                      Table: {(order?.tables as any)?.name || "Takeaway"}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Order ID: {order?.order_id}
@@ -247,7 +246,9 @@ export default function Dashboard() {
                 </div>
               ))
             ) : (
-              <p>No active Orders</p>
+              <p className="pb-6 text-sm text-muted-foreground text-center">
+                No active Orders
+              </p>
             )}
           </div>
         </Card>
