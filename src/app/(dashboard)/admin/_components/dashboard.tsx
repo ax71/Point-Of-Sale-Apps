@@ -117,18 +117,25 @@ export default function Dashboard() {
     },
   });
 
-  const { data: totalOrder } = useQuery({
+  const { data: totalOrder = 0 } = useQuery({
     queryKey: ["total-order"],
     queryFn: async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from("orders")
-        .select("id", { count: "exact" })
+        .select("*", { count: "exact", head: true })
         .eq("status", "settled")
         .gte("created_at", thisMonthISO);
 
-      return count;
+      if (error) {
+        console.error(error);
+        throw error;
+      }
+
+      return count ?? 0;
     },
   });
+
+  console.log({ totalOrder });
 
   const { data: lastOrder } = useQuery({
     queryKey: ["last-order"],
@@ -179,9 +186,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardDescription>Total Order</CardDescription>
-            <CardTitle className="text-3xl font-bold">
-              {totalOrder ?? 0}
-            </CardTitle>
+            <CardTitle className="text-3xl font-bold">{totalOrder}</CardTitle>
           </CardHeader>
           <CardFooter>
             <div className="text-muted-foreground text-sm">
